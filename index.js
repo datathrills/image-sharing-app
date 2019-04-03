@@ -13,7 +13,18 @@ app.use(express.static('static'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+// Database connection config
+const connection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "imageboard",
+});
 
+// Connect to database
+connection.connect( err => {
+    (err)? console.log("Error connecting to Database" + err) : console.log("Connected to Database");
+});
 
 // Variables for testing
 const sessionTest = true;
@@ -25,8 +36,27 @@ const sessionTest = true;
 
 // Home page
 app.get('/', (req, res) => {
+
+    // SQL
+    const sql ="SELECT * FROM threads";
+
+    connection.query(sql, (err, results) => {
+        if (err) {
+            res.status(500).send("Database Error!");
+        } else {
+            if (results.length > 0) {
+                // Render index
+                console.log(results[0])
+                res.render('index', {data: results, sess: sessionTest});
+            } else {
+                res.status(500).send("Database is empty!");
+            };
+        };
+    });
+
+
     
-    res.render('index', {sess: sessionTest});
+    //res.render('index', {sess: sessionTest});
     
 });
 

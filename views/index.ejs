@@ -46,17 +46,24 @@
     </header>
 
     <main>
+        <div class="gallery">
 
-        <div class="thumb-cont">A</div>
-        <div class="thumb-cont">B</div>
-        <div class="thumb-cont">C</div>
-        <div class="thumb-cont">D</div>
-        <div class="thumb-cont">E</div>
-        <div class="thumb-cont">F</div>
-        <div class="thumb-cont">G</div>
-        <div class="thumb-cont">H</div>
+            <% for (var i = 0; i < data.length; i++) { %>
+                <div class="thread">
+                    <img class="thread-image" src="images/<%= data[i].thread_image_id %>">
+                    <div class="thread-info-cont">
+                        <div class="username"><%= data[i].thread_opid %></div>
+                        <div class="dateTime"><%= data[i].thread_timestamp %></div>
+                        <div class="likes"><%= data[i].thread_likes %></div>
+                    </div>
+                    <div class="thread-name"><%= data[i].thread_name %></div>
+                    <div class="thread-text"><%= data[i].thread_text %></div>
+                </div>
+            <% }; %>
 
+        </div>
     </main>
+    
     <footer>
         Links and stuff...
     </footer>
