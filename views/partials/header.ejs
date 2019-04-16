@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Sharing Application</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div id="title-logo">Image Sharing App</div>
+        
+        <% if (sess) { %>
+        <div id="log-reg-cont">
+            <div id="login-cont">
+                <form class ="form-cont" method="POST" action="/login" novalidate>
+                    <div class="form-field">
+                        <div class="input">
+                            <label for="email">User </label>
+                            <input name="username" type="text" value="" />
+                        </div>
+                        <div class="input">
+                            <label for="email">Password </label>
+                            <input name="password" type="password" value="" />
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn" type="submit">Login</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="register-cont">
+                / <a href="/registration">Register</a>
+            </div>
+        </div>
+        <% } else { %>
+            <div>Hello Marko!</div>
+        <% } %>
+
+
+
+
+
+    </header>

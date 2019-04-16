@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Sharing Application</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div id="title-logo">Image Sharing App</div>
+        
+
+        <div id="log-reg-cont">
+            Go to homepage
+        </div>
+    </header>
+
+    <main>
+        <div class=".forms-cont">
+            <div class="register-cont">
+
+                        <form class ="registration-register-cont" method="POST" action="/register" novalidate>
+                            <div class="register-field">
+                                <div class="register-input">
+                                    <label for="email">Username </label>
+                                    <input name="username" type="text" value="" />
+                                </div>
+                                <div class="registration-instructions">
+                                    Your username must contain only alphanumeric characters and be at least 3 characters long, but no more than 20 characters long.
+                                </div>
+                                <div class="register-input">
+                                    <label for="email">Password </label>
+                                    <input name="password" type="password" value="" />
+                                </div>
+                                <div class="registration-instructions">
+                                    Your password must contian only from a-z or A-z letter and numbers. It must be at least 8 character long, but no more than 20 character long.
+                                    
+                                </div>
+                                <div class="register-input">
+                                    <label for="email">Repeat Password </label>
+                                    <input name="password" type="password" value="" />
+                                </div>
+                            </div>
+                            <div class="registration-action">
+                                    <button class="btn" type="submit">Register</button>
+                            </div>
+                            
+                        </form>
+
+
+
+            </div>
+            <div class="between">
+                Already registered?
+            </div>
+            <div class="login-cont">
+
+                
+
+            </div>
+        </div>
+
+
+    </main>
+
+
+
+<%- include partials/footer -%>

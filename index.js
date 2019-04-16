@@ -4,6 +4,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const mysql = require("mysql");
+const joi = require('joi');
 
 // Express app object
 const app = express();
@@ -12,6 +13,12 @@ const app = express();
 app.use(express.static('static'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+
+// Define schema for joi validation
+const schema = joi.object().keys({
+    username: joi.string().alphanum().min(3).max(20).required(),
+    password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).min(8).max(20)
+}).with('username', 'password');
 
 // Database connection config
 const connection = mysql.createConnection({
@@ -91,6 +98,11 @@ app.get('/threads/:id', (req, res) => {
 
     //req.params.id
     //USE THREAD ID
+});
+
+app.get('/registration', (req, res) => {
+    res.render('registration');
+
 });
 
 // Start the server
