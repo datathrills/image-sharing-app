@@ -59,6 +59,8 @@ label {
 /* Threads */
 
 .gallery {
+
+    padding: 30px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     grid-auto-rows: 300px;
@@ -76,6 +78,24 @@ label {
     flex-wrap: wrap;
 }
 
+/* Comments */
+
+.big-img-cont {
+    padding: 20px;
+}
+
+.big-img {
+    max-width: 100%; 
+}
+
+.post-cont {
+    padding: 0px 20px 20px 20px;
+}
+
+.post {
+    background: #9baec8;
+    margin-bottom: 10px;
+}
 
 
 /* Footer */
@@ -83,3 +103,4 @@ footer{
     position: fixed;
     bottom: 0;
 }
+

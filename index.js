@@ -15,6 +15,10 @@ app.set('views', 'views');
 
 // Database connection config
 const connection = mysql.createConnection({
+    // Enable multiple statement queries
+    // Separate each statement with a semi-colon ;
+    // Result will be an array for each statement
+    multipleStatements: true,   
     host: "localhost",
     user: "root",
     password: "",
@@ -46,7 +50,7 @@ app.get('/', (req, res) => {
         } else {
             if (results.length > 0) {
                 // Render index
-                console.log(results[0])
+                //console.log(results)
                 res.render('index', {data: results, sess: sessionTest});
             } else {
                 res.status(500).send("Database is empty!");
@@ -54,10 +58,39 @@ app.get('/', (req, res) => {
         };
     });
 
+    //res.render('index', {sess: sessionTest});    
+});
 
+app.get('/threads/:id', (req, res) => {
     
-    //res.render('index', {sess: sessionTest});
-    
+    const threadUrl = req.params.id;
+
+    //SQL
+    const sql_query_1 = "SELECT * FROM threads WHERE id=" + String(threadUrl);        // results[0]
+    const sql_query_2 = "SELECT * FROM replies WHERE thread_id=" + String(threadUrl); // results[1]
+    const sql = sql_query_1 + "; " + sql_query_2;
+    console.log(sql);
+
+    connection.query(sql, (err, results) => {
+        if(err){
+            res.status(500).send("Database Error!");
+        } else {
+            if(results.length > 0) {
+
+                res.render('thread', {thread: results[0], replies: results[1], sess: sessionTest});
+                console.log("-----FIRST QUERY----")
+                console.log(results[0]);
+                //console.log("-----SECOND QUERY----");
+                //console.log(results[1]);
+                console.log("======END=============")
+            } else {
+                res.status(500).send("Database is empty!");
+            }
+        }
+    })
+
+    //req.params.id
+    //USE THREAD ID
 });
 
 // Start the server

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Image Sharing Application</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
@@ -46,18 +46,19 @@
     </header>
 
     <main>
-        <div class="gallery">
+        <div class="big-img-cont">
+                <img class="big-img" src="../images/<%= thread[0].thread_image_id %>">
+        </div>
+        
+        <div class="post-cont">
 
-            <% for (var i = 0; i < data.length; i++) { %>
-                <div class="thread">
-                    <a href="threads/<%=data[i].id %>"><img class="thread-image" src="images/<%= data[i].thread_image_id %>"></a>
+            <% for (var i = 0; i < replies.length; i++) { %>
+                <div class="post">
                     <div class="thread-info-cont">
-                        <div class="username"><%= data[i].thread_opid %></div>
-                        <div class="dateTime"><%= data[i].thread_timestamp %></div>
-                        <div class="likes"><%= data[i].thread_likes %></div>
+                        <div class="username"><%= replies[i].reply_user_id %></div>
+                        <div class="dateTime"><%= replies[i].reply_timestamp %></div>
                     </div>
-                    <div class="thread-name"><%= data[i].thread_name %></div>
-                    <div class="thread-text"><%= data[i].thread_text %></div>
+                    <div class="thread-text"><%= replies[i].reply_text %></div>
                 </div>
             <% }; %>
 
