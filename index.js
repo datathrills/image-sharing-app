@@ -13,6 +13,7 @@ const app = express();
 app.use(express.static('static'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+app.use(bodyParser.urlencoded({extended: true}));
 
 // Define schema for joi validation
 const schema = joi.object().keys({
@@ -104,6 +105,20 @@ app.get('/registration', (req, res) => {
     res.render('registration');
 
 });
+
+app.post('/login', (req, res) =>{
+
+    //joi.validate({ username: req.body.username, password: req.body.password }, schema);
+    joi.validate({ username: req.body.username, password: req.body.password }, schema, (err, value) => {
+        if(err){
+            console.log(err);
+
+        } else {
+            console.log("OK!")
+        }
+    })
+
+})
 
 
 
