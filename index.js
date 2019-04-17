@@ -15,10 +15,18 @@ app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(bodyParser.urlencoded({extended: true}));
 
+// Session cookie
+app.use(session({
+    secret:'crmorytp8vyp98p%&ADIB66^^&fjdfdfaklfdhf',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {maxAge: 60000}
+}));
+
 // Define schema for joi validation
 const schema = joi.object().keys({
     username: joi.string().alphanum().min(3).max(20).required(),
-    password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).min(8).max(20)
+    password: joi.string().regex(/^[a-zA-Z0-9]{8,20}$/).min(8).max(20)
 }).with('username', 'password');
 
 // Database connection config
@@ -39,7 +47,7 @@ connection.connect( err => {
 });
 
 // Variables for testing
-const sessionTest = true;
+//const sessionTest = true;
 
 
 //////////////////////
@@ -48,6 +56,18 @@ const sessionTest = true;
 
 // Home page
 app.get('/', (req, res) => {
+
+    const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(userIP);
+
+    // Session data
+    const sessionData = req.session.data;  
+    const sessionCheck = (sessionData) => {
+        return (sessionData) ? sessionData : false;
+    };
+    const session = sessionCheck(sessionData);
+
+
 
     // SQL
     const sql ="SELECT * FROM threads";
@@ -59,7 +79,7 @@ app.get('/', (req, res) => {
             if (results.length > 0) {
                 // Render index
                 //console.log(results)
-                res.render('index', {data: results, sess: sessionTest});
+                res.render('index', {data: results, session: session });
             } else {
                 res.status(500).send("Database is empty!");
             };
@@ -70,7 +90,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/threads/:id', (req, res) => {
+
+    // Session data
+    const sessionData = req.session.data;  
+    const sessionCheck = (sessionData) => {
+        return (sessionData) ? sessionData : false;
+    };
+    const session = sessionCheck(sessionData);
     
+    //URL
     const threadUrl = req.params.id;
 
     //SQL
@@ -85,7 +113,7 @@ app.get('/threads/:id', (req, res) => {
         } else {
             if(results.length > 0) {
 
-                res.render('thread', {thread: results[0], replies: results[1], sess: sessionTest});
+                res.render('thread', {thread: results[0], replies: results[1], session: session});
                 console.log("-----FIRST QUERY----")
                 console.log(results[0]);
                 //console.log("-----SECOND QUERY----");
@@ -102,23 +130,144 @@ app.get('/threads/:id', (req, res) => {
 });
 
 app.get('/registration', (req, res) => {
-    res.render('registration');
 
+    // Session data
+    const sessionData = req.session.data;  
+
+    // Registration page is only displayed if the user is not logged in
+    if(sessionData){
+        res.redirect('/');
+    } else {
+        res.render('registration', {message: false});
+    };
 });
+
 
 app.post('/login', (req, res) =>{
 
-    //joi.validate({ username: req.body.username, password: req.body.password }, schema);
-    joi.validate({ username: req.body.username, password: req.body.password }, schema, (err, value) => {
-        if(err){
-            console.log(err);
+    // Session data
+    const sessionData = req.session.data;  
+
+    // Registration page is only displayed if the user is not logged in
+    if(sessionData){
+        res.redirect('/');
+    } else {
+
+        const username = req.body.usernameLogin;
+        const password = req.body.passwordLogin;
+
+        // joi validation 
+        joi.validate({ username: username, password: password }, schema, (err, value) => {
+            if(err){
+                res.render('registration', {message: err});
+            } else {
+                console.log("JOI validation is OK!");
+
+                //SQL
+                const sql = "SELECT * FROM users WHERE username='" + String(username) + "' AND password='" + String(password) + "'";
+
+                connection.query(sql, (err, results) => {
+                    
+                    if(err){
+                        res.render('registration', {message: err});
+
+                    } else {
+                        if(results.length > 0) {
+                            
+                            //Create session cookie
+                            req.session.data = username;
+                            // Reload previous page
+                            res.redirect('/');
+
+                        } else {
+                            res.render('registration', {message: "ERROR!!! Wrong username or password!"});
+                        };
+                    };
+                });
+            };
+        });
+    };
+});
+
+app.post('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+app.post('/register', (req, res) => {
+
+    // Session data
+    const sessionData = req.session.data;  
+
+    // Registration page is only displayed if the user is not logged in
+    if(sessionData){
+        res.redirect('/');
+    } else {
+        const username = req.body.usernameRegister;
+        const password = req.body.passwordRegister;
+        const passwordRepeat = req.body.passwordRegisterRepeat;
+        
+        // IP ADRESS and exception for testing on localhost problem
+        let userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        if(userIP === "::1") {
+            userIP = "134.226.214.244";
+        };
+
+        //Check if the password is correctly repeated
+        if(password === passwordRepeat){
+
+            ///////////////////
+            joi.validate({ username: username, password: password }, schema, (err, value) => {
+                if(err){
+                    res.render('registration', {message: err});
+                } else {
+                    console.log("JOI validation is OK!");
+        
+                    //SQL CHECK THE USERNAME
+                    const sqlTestName = "SELECT * FROM users WHERE username='" + String(username) + "'";
+        
+                    connection.query(sqlTestName, (err, results) => {
+                        
+                        if(err){
+                            res.render('registration', {message: err});
+        
+                        } else {
+                            if(results.length > 0) {
+                                
+                                res.render('registration', {message: "~OMG!*{ERROR!}}// That username is taken. Try another!"});    
+                            } else {
+
+                                // SQL REGISTER NEW USER
+                                const sqlInsertUser = "INSERT INTO users (id, username, password, ip_address) VALUES (NULL, '"+ username +"', '"+ password+"', '" + userIP +"')";
+
+                                console.log(sqlInsertUser);
+                                console.log("Registering a new user...")
+
+                                connection.query(sqlInsertUser, (err) => {
+                        
+                                    if(err){
+                                        res.render('registration', {message: err});
+                    
+                                    } else {
+                                        
+                                        //Create session cookie & redirect to homepage
+                                        req.session.data = username;
+                                        res.redirect('/');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            /////////////////////////////////
+
 
         } else {
-            console.log("OK!")
-        }
-    })
-
-})
+            res.render('registration', {message: "ERROR!!!TYPE=FASTTYPER{/ *)^OMG!!? Your password didn't match with previous entry!"});
+        };
+    };
+});
 
 
 

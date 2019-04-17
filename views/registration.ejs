@@ -18,40 +18,47 @@
     </header>
 
     <main>
+
+        <% if (message) { %>
+        <div class="error-message">
+            Oops! Something went wrong... </br>
+            Check out the error message bellow and try again! </br>
+            <div id="error">
+            <%= message %>
+            </div>
+        </div>
+        <% } %>
+
         <div class="forms-cont">
             <div class="register-cont">
-
-                        <form class ="registration-register-cont" method="POST" action="/register" novalidate>
-                            <div class="register-field">
-                                <div class="register-input">
-                                    <label for="email">Username </label>
-                                    <input name="username" type="text" value="" />
-                                </div>
-                                <div class="registration-instructions">
-                                    Your username must contain only alphanumeric characters and be at least 3 characters long, but no more than 20 characters long.
-                                </div>
-                                <div class="register-input">
-                                    <label for="email">Password </label>
-                                    <input name="password" type="password" value="" />
-                                </div>
-                                <div class="registration-instructions">
-                                    Your password must contian only from a-z or A-z letter and numbers. It must be at least 8 character long, but no more than 20 character long.
-                                    
-                                </div>
-                                <div class="register-input">
-                                    <label for="email">Repeat Password </label>
-                                    <input name="password" type="password" value="" />
-                                </div>
-                            </div>
-                            <div class="registration-action">
-                                    <button class="btn" type="submit">Register</button>
-                            </div>
+                <form class ="registration-register-cont" method="POST" action="/register" novalidate>
+                    <div class="register-field">
+                        <div class="register-input">
+                            <label for="email">Username </label>
+                            <input name="usernameRegister" type="text" value="" />
+                        </div>
+                        <div class="registration-instructions">
+                            Your username must contain only alphanumeric characters and be at least 3 characters long, but no more than 20 characters long.
+                        </div>
+                        <div class="register-input">
+                            <label for="email">Password </label>
+                            <input name="passwordRegister" type="password" value="" />
+                        </div>
+                        <div class="registration-instructions">
+                            Your password must contian only from a-z or A-z letter and numbers. It must be at least 8 character long, but no more than 20 character long.
                             
-                        </form>
-
-
-
+                        </div>
+                        <div class="register-input">
+                            <label for="email">Repeat Password </label>
+                            <input name="passwordRegisterRepeat" type="password" value="" />
+                        </div>
+                    </div>
+                    <div class="registration-action">
+                            <button class="btn" type="submit">Register</button>
+                    </div> 
+                </form>
             </div>
+
             <div class="between">
                 Already registered?
             </div>
@@ -63,14 +70,14 @@
                         <div class="register-field">
                             <div class="register-input">
                                 <label for="email">Username </label>
-                                <input name="username" type="text" value="" />
+                                <input name="usernameLogin" type="text" value="" />
                             </div>
                             
                             <div class="registration-instructions"></div>
                             
                             <div class="register-input">
                                 <label for="email">Password </label>
-                                <input name="password" type="password" value="" />
+                                <input name="passwordLogin" type="password" value="" />
                             </div>
                         </div>
 

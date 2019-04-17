@@ -11,36 +11,45 @@
     <header>
         <div id="title-logo">Image Sharing App</div>
         
-        <% if (sess) { %>
-        <div id="log-reg-cont">
-            <div id="login-cont">
-                <form class ="form-cont" method="POST" action="/login" novalidate>
-                    <div class="form-field">
-                        <div class="input">
-                            <label for="email">User </label>
-                            <input name="username" type="text" value="" />
-                        </div>
-                        <div class="input">
-                            <label for="email">Password </label>
-                            <input name="password" type="password" value="" />
-                        </div>
+        <% if (session) { %>
+            <div id="log-reg-cont">
+                    <div id="login-cont">
+                        <form class ="form-cont" method="POST" action="/logout" novalidate>
+                            <div class="form-field">
+                                <div class="input">
+                                    <label for="email">You are logged in as <span><%= session %></span></label>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn" type="submit">Logout</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-actions">
-                        <button class="btn" type="submit">Login</button>
-                    </div>
-                </form>
-            </div>
 
-            <div id="register-cont">
-                / <a href="/registration">Register</a>
-            </div>
-        </div>
         <% } else { %>
-            <div>Hello Marko!</div>
+            <div id="log-reg-cont">
+                <div id="login-cont">
+                    <form class ="form-cont" method="POST" action="/login" novalidate>
+                        <div class="form-field">
+                            <div class="input">
+                                <label for="email">User </label>
+                                <input name="usernameLogin" type="text" value="" />
+                            </div>
+                            <div class="input">
+                                <label for="email">Password </label>
+                                <input name="passwordLogin" type="password" value="" />
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Login</button>
+                        </div>
+                    </form>
+                </div>
+    
+                <div id="register-cont">
+                    / <a href="/registration">Register</a>
+                </div>
+            </div>
         <% } %>
-
-
-
-
 
     </header>
