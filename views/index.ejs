@@ -3,11 +3,47 @@
     <main>
         <div class="gallery">
 
+            <% if (session) { %>
+                <div class="new-thread">
+                    <form class ="form-cont" ref="uploadForm" id="uploadForm" action="/upload" method="post" encType="multipart/form-data">
+                        <div class="upload-field">
+
+                            <div class="upload-input">
+                                <label for="subject">Subject</label></br>
+                                <input name="uploadTitle" type="text" value="" />
+                            </div><br>
+
+                            <div class="upload-input">
+                                    <label for="comment">Comment</label></br>
+                                    <textarea name="uploadComment"  rows="8" wrap="soft" tabindex="4"></textarea>
+                            </div><br>
+
+                            <div class="upload-input">
+                                <input type="file" name="uploadedPicture" accept="image/*" />
+                                <div class="form-actions" id="upload-action">
+                                        <input class="btn" type="submit" value="Post!"/>
+                                </div>
+                                
+                                <br>
+
+                                <div class="error-message-upload">
+                                    <%= uploadMessage %>
+                                </div>
+
+                            </div>
+                            
+
+                            
+                        </div>
+                    </form>
+                </div>
+            <% }; %>
+
             <% for (var i = 0; i < data.length; i++) { %>
                 <div class="thread">
                     <a href="threads/<%=data[i].id %>"><img class="thread-image" src="images/<%= data[i].thread_image_id %>"></a>
                     <div class="thread-info-cont">
-                        <div class="username"><%= data[i].thread_opid %></div>
+                        <div class="username"><%= data[i].username %></div>
                         <div class="dateTime"><%= data[i].thread_timestamp %></div>
                         <div class="likes"><%= data[i].thread_likes %></div>
                     </div>

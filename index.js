@@ -14,6 +14,7 @@ app.use(express.static('static'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(fileUpload());
 
 // Session cookie
 app.use(session({
@@ -28,6 +29,10 @@ const schema = joi.object().keys({
     username: joi.string().alphanum().min(3).max(20).required(),
     password: joi.string().regex(/^[a-zA-Z0-9]{8,20}$/).min(8).max(20)
 }).with('username', 'password');
+
+const schemaUpload = joi.object().keys({
+    uploadFile: joi.string().regex(/\.(?:jpg|gif|png)/)
+});
 
 // Database connection config
 const connection = mysql.createConnection({
@@ -58,7 +63,7 @@ connection.connect( err => {
 app.get('/', (req, res) => {
 
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(userIP);
+    //console.log(userIP);
 
     // Session data
     const sessionData = req.session.data;  
@@ -70,7 +75,8 @@ app.get('/', (req, res) => {
 
 
     // SQL
-    const sql ="SELECT * FROM threads";
+    //const sql ="SELECT * FROM threads";
+    const sql = "SELECT threads.*, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id"
 
     connection.query(sql, (err, results) => {
         if (err) {
@@ -79,7 +85,7 @@ app.get('/', (req, res) => {
             if (results.length > 0) {
                 // Render index
                 //console.log(results)
-                res.render('index', {data: results, session: session });
+                res.render('index', {data: results, session: session, uploadMessage: ""});
             } else {
                 res.status(500).send("Database is empty!");
             };
@@ -102,8 +108,12 @@ app.get('/threads/:id', (req, res) => {
     const threadUrl = req.params.id;
 
     //SQL
+
     const sql_query_1 = "SELECT * FROM threads WHERE id=" + String(threadUrl);        // results[0]
-    const sql_query_2 = "SELECT * FROM replies WHERE thread_id=" + String(threadUrl); // results[1]
+  
+    
+    const sql_query_2 = "SELECT replies.*, users.username FROM replies LEFT JOIN users ON replies.reply_user_id=users.id WHERE thread_id=" + String(threadUrl); // results[1]
+
     const sql = sql_query_1 + "; " + sql_query_2;
     console.log(sql);
 
@@ -269,8 +279,89 @@ app.post('/register', (req, res) => {
     };
 });
 
+app.post('/upload', (req, res) => {
+
+    // Session data
+    const sessionData = req.session.data;  
+    const sessionCheck = (sessionData) => {
+        return (sessionData) ? sessionData : false;
+    };
+    const session = sessionCheck(sessionData);
+
+    if (Object.keys(req.files).length == 0) {
+        return  connectAndRenderHomepage(req, res, session, "ERROR!!)){'Little_error'}No files were uploaded!!");
+    }
+    
+    const file = req.files.uploadedPicture;
+    const fileType = String(file.name).match(/\.(?:jpg|gif|png)/)[0];
+    const fileRandomName =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const fileNewName = fileRandomName + fileType;
+    //console.log(fileNewName);
+
+
+    
+    joi.validate({ uploadFile: file.name}, schemaUpload, (err_joi, value) => {
+        if(err_joi){
+            connectAndRenderHomepage(req, res, session, err_joi);
+        } else {
+
+            file.mv("./static/images/" + fileNewName, err => {
+                if(err){
+                    connectAndRenderHomepage(req, res, session, err); 
+                } else {
+
+                    const subject = req.body.uploadTitle;
+                    const comment = req.body.uploadComment;
+
+                    const sqlUserID = "SELECT id FROM users WHERE username='" + String(sessionData) + "'";
+
+                    connection.query(sqlUserID, (err, results) => {
+                        
+                        if (err) {
+                            res.status(500).send("Database Error!");
+                        } else {
+                            
+                            const userID = results[0]["id"];
+                            
+                            // Upload database
+                            const sqlInsertUser = "INSERT INTO threads (id, thread_opid, thread_name, thread_text, thread_image_id) VALUES (NULL, '" + userID +"', '" + subject +"', '" + comment +"', '" + fileNewName + "')";
+
+                            connection.query(sqlInsertUser, (err_update) => {
+                                
+                                if (err_update) {
+                                    res.status(500).send("Database Error!");
+                                } else {
+                                    res.redirect('/'); 
+                                };
+                            });
+                        };    
+                    });
+                };
+            });
+        };
+    });
+});
 
 
 // Start the server
 const port = process.env.PORT || 8081;
 app.listen(port, () => console.log(`Server running on ${port}`));
+
+
+// Renders a homepage with upload error messages
+function connectAndRenderHomepage(req, res, session, error_message){
+    // SQL
+    const sql ="SELECT * FROM threads";
+
+    connection.query(sql, (err, results) => {
+        if (err) {
+            res.status(500).send("Database Error!");
+        } else {
+            if (results.length > 0) {
+                res.render('index', {data: results, session: session, uploadMessage: error_message});
+            } else {
+                res.status(500).send("Database is empty!");
+            };
+        };
+    });
+};

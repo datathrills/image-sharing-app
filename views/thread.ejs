@@ -3,6 +3,8 @@
     <main>
         <div class="big-img-cont">
                 <img class="big-img" src="../images/<%= thread[0].thread_image_id %>">
+                <div class="thread-name"><%= thread[0].thread_name %></div>
+                <div class="thread-text"><%= thread[0].thread_text %></div>
         </div>
         
         <div class="post-cont">
@@ -10,7 +12,7 @@
             <% for (var i = 0; i < replies.length; i++) { %>
                 <div class="post">
                     <div class="thread-info-cont">
-                        <div class="username"><%= replies[i].reply_user_id %></div>
+                        <div class="username"><%= replies[i].username %></div>
                         <div class="dateTime"><%= replies[i].reply_timestamp %></div>
                     </div>
                     <div class="thread-text"><%= replies[i].reply_text %></div>
