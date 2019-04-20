@@ -21,7 +21,7 @@ app.use(session({
     secret:'crmorytp8vyp98p%&ADIB66^^&fjdfdfaklfdhf',
     resave: false,
     saveUninitialized: true,
-    cookie: {maxAge: 60000}
+    cookie: {maxAge: 600000} // 10 minutes
 }));
 
 // Define schema for joi validation
@@ -76,7 +76,11 @@ app.get('/', (req, res) => {
 
     // SQL
     //const sql ="SELECT * FROM threads";
-    const sql = "SELECT threads.*, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id"
+    // Execture bunch of sql // results is [2]!!! Need tweeking!
+
+    const threadsWithHeart = "SELECT thread_id AS thread FROM likes WHERE likes.user_id= (SELECT users.id FROM users WHERE users.username='" + sessionData +"')";
+
+    const sql = "CREATE TABLE Temp(thread_id int(11), thread_likes int(11)); INSERT INTO Temp SELECT thread_id, COUNT(likes.id) AS thread_likes FROM likes WHERE likes.thread_id = ANY(SELECT threads.id FROM threads); SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id;"+ threadsWithHeart +";DROP TABLE Temp";
 
     connection.query(sql, (err, results) => {
         if (err) {
@@ -85,7 +89,7 @@ app.get('/', (req, res) => {
             if (results.length > 0) {
                 // Render index
                 //console.log(results)
-                res.render('index', {data: results, session: session, uploadMessage: ""});
+                res.render('index', {data: results[2], likedThread: results[3], session: session, uploadMessage: ""});
             } else {
                 res.status(500).send("Database is empty!");
             };
@@ -109,10 +113,10 @@ app.get('/threads/:id', (req, res) => {
 
     //SQL
 
-    const sql_query_1 = "SELECT * FROM threads WHERE id=" + String(threadUrl);        // results[0]
+    const sql_query_1 = "SELECT threads.thread_name, threads.thread_text, threads.thread_image_id, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id WHERE threads.id=" + String(threadUrl);        // results[0]
   
     
-    const sql_query_2 = "SELECT replies.*, users.username FROM replies LEFT JOIN users ON replies.reply_user_id=users.id WHERE thread_id=" + String(threadUrl); // results[1]
+    const sql_query_2 = "SELECT replies.id, replies.reply_text, DATE_FORMAT(replies.reply_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS reply_timestamp, users.username FROM replies LEFT JOIN users ON replies.reply_user_id=users.id WHERE thread_id=" + String(threadUrl); // results[1]
 
     const sql = sql_query_1 + "; " + sql_query_2;
     console.log(sql);
@@ -342,6 +346,30 @@ app.post('/upload', (req, res) => {
     });
 });
 
+app.post('/likes/:id', (req, res) => {
+    
+    const sessionData = req.session.data;
+
+    // Restrict access to login users
+    if(sessionData){
+        res.redirect('/');
+    } else {
+        //Check if user has allready liked this post
+
+        const threadID = req.params.id;
+
+
+
+
+    }
+
+    
+    
+
+
+
+});
+
 
 // Start the server
 const port = process.env.PORT || 8081;
@@ -351,14 +379,14 @@ app.listen(port, () => console.log(`Server running on ${port}`));
 // Renders a homepage with upload error messages
 function connectAndRenderHomepage(req, res, session, error_message){
     // SQL
-    const sql ="SELECT * FROM threads";
+    const sql ="CREATE TABLE Temp(thread_id int(11), thread_likes int(11)); INSERT INTO Temp SELECT thread_id, COUNT(likes.id) AS thread_likes FROM likes WHERE likes.thread_id = ANY(SELECT threads.id FROM threads); SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id; DROP TABLE Temp";
 
     connection.query(sql, (err, results) => {
         if (err) {
             res.status(500).send("Database Error!");
         } else {
             if (results.length > 0) {
-                res.render('index', {data: results, session: session, uploadMessage: error_message});
+                res.render('index', {data: results[2], session: session, uploadMessage: error_message});
             } else {
                 res.status(500).send("Database is empty!");
             };

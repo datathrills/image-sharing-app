@@ -1,24 +1,46 @@
 <%- include partials/header -%>
 
     <main>
-        <div class="big-img-cont">
-                <img class="big-img" src="../images/<%= thread[0].thread_image_id %>">
-                <div class="thread-name"><%= thread[0].thread_name %></div>
-                <div class="thread-text"><%= thread[0].thread_text %></div>
-        </div>
-        
-        <div class="post-cont">
-
-            <% for (var i = 0; i < replies.length; i++) { %>
-                <div class="post">
+        <div class="thread-container">
+            <div class="big-img-cont">
+                    <img class="big-img" src="../images/<%= thread[0].thread_image_id %>">
                     <div class="thread-info-cont">
-                        <div class="username"><%= replies[i].username %></div>
-                        <div class="dateTime"><%= replies[i].reply_timestamp %></div>
+                        <div class="username"><%= thread[0].username %></div>
+                        <div class="dateTime"><%= thread[0].thread_timestamp %></div>
                     </div>
-                    <div class="thread-text"><%= replies[i].reply_text %></div>
-                </div>
-            <% }; %>
+                    <div class="thread-name"><%= thread[0].thread_name %></div>
+                    <div class="thread-text"><%= thread[0].thread_text %></div>
+            </div>
+            
+            <div class="post-cont">
 
+                <% for (var i = 0; i < replies.length; i++) { %>
+                    <div class="post">
+                        <div class="thread-info-cont">
+                            <div class="username"><%= replies[i].username %></div>
+                            <div class="dateTime"><%= replies[i].reply_timestamp %></div>
+                        </div>
+                        <div class="thread-text"><%= replies[i].reply_text %></div>
+                    </div>
+                <% }; %>
+
+                <% if (session) { %>
+                    <div class="new-comment">
+                        <form class ="form-cont" ref="commentForm" id="commentForm" action="/upload" method="post" encType="multipart/form-data">
+                            <div class="comment-field">
+                                <div class="comment-input">
+                                    <label for="comment">Comment</label></br>
+                                    <textarea name="uploadComment"  rows="8" wrap="soft" tabindex="4"></textarea>
+                                </div><br>
+                                <div class="form-actions" id="upload-action">
+                                    <input class="btn" type="submit" value="Comment"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                <% }; %>
+
+            </div>
         </div>
     </main>
     
