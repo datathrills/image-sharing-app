@@ -7,7 +7,7 @@ $(function() {
             url: "/likes/" + $(this).attr('id'),
             type: "POST"
         }).done (function(result){
-            $(".upvote-container > #" + String(result)).addClass("upvote-non-clickable-btn");
+            $(".upvote-container > #" + String(result)).addClass("upvote-non-clickable-btn").off();
             const numberOfLikes = $(".upvote-container > .num-" + String(result)).text();
             $(".upvote-container > .num-" + String(result)).text(String(Number(numberOfLikes) + 1));
         }).fail(function(err){

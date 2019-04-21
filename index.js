@@ -64,7 +64,7 @@ connection.connect( err => {
 app.get('/', (req, res) => {
 
     //REMOVE THIS
-    req.session.data = "bestUser";
+    //req.session.data = "testingBro";
 
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     //console.log(userIP);
@@ -117,34 +117,29 @@ app.get('/threads/:id', (req, res) => {
 
     //SQL
 
-    const sql_query_1 = "SELECT threads.thread_name, threads.thread_text, threads.thread_image_id, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id WHERE threads.id=" + String(threadUrl);        // results[0]
-  
+    const sql_query_1 = "SELECT threads.thread_name, threads.id, threads.thread_text, threads.thread_image_id, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id WHERE threads.id=" + String(threadUrl);        // results[0]
     
     const sql_query_2 = "SELECT replies.id, replies.reply_text, DATE_FORMAT(replies.reply_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS reply_timestamp, users.username FROM replies LEFT JOIN users ON replies.reply_user_id=users.id WHERE thread_id=" + String(threadUrl); // results[1]
 
-    const sql = sql_query_1 + "; " + sql_query_2;
-    console.log(sql);
+    const sql_query_3 = "SELECT thread_id AS thread FROM likes WHERE likes.user_id= (SELECT users.id FROM users WHERE users.username='"+sessionData+"') AND likes.thread_id=" + String(threadUrl);
+
+    const sql_query_4 = "SELECT threads.id AS thread_id, COUNT(likes.id) as num_likes FROM threads LEFT JOIN likes ON likes.thread_id = threads.id WHERE threads.id="+ String(threadUrl);
+
+    const sql = sql_query_1 + "; " + sql_query_2 + "; " + sql_query_3 + "; " + sql_query_4 ;
+    //console.log(sql);
 
     connection.query(sql, (err, results) => {
         if(err){
             res.status(500).send("Database Error!");
         } else {
             if(results.length > 0) {
-
-                res.render('thread', {thread: results[0], replies: results[1], session: session});
-                console.log("-----FIRST QUERY----")
-                console.log(results[0]);
-                //console.log("-----SECOND QUERY----");
-                //console.log(results[1]);
-                console.log("======END=============")
+                console.log("CRASH FLAG")
+                res.render('thread', {thread: results[0], replies: results[1], session: session, likedThread: results[2], likesNum: results[3]});
             } else {
                 res.status(500).send("Database is empty!");
             }
         }
     })
-
-    //req.params.id
-    //USE THREAD ID
 });
 
 app.get('/registration', (req, res) => {
@@ -402,11 +397,6 @@ app.post('/likes/:id', (req, res) => {
     }
 });
 
-
-app.post('/threads/:id/likes/:name', (req, res) => {
-
-
-});
 
 // Start the server
 const port = process.env.PORT || 8081;
