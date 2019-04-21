@@ -43,23 +43,25 @@
                     </div>
                 <% }; %>
 
-                <% if (session) { %>
-                    <div class="new-comment">
-                        <form class ="form-cont" ref="commentForm" id="commentForm" action="/upload" method="post" encType="multipart/form-data">
-                            <div class="comment-field">
-                                <div class="comment-input">
-                                    <label for="comment">Comment</label></br>
-                                    <textarea name="uploadComment"  rows="8" wrap="soft" tabindex="4"></textarea>
-                                </div><br>
-                                <div class="form-actions" id="upload-action">
-                                    <input class="btn" type="submit" value="Comment"/>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                <% }; %>
-
             </div>
+
+            <% if (session) { %>
+                <div class="new-comment">
+                    <form class ="form-cont" ref="commentForm" id="commentForm" action="" method="post" encType="multipart/form-data">
+                        <div class="comment-field">
+                            <div class="comment-input">
+                                <label for="comment">Comment</label></br>
+                                <textarea id="comment-textarea" name="uploadComment"  rows="8" wrap="soft" tabindex="4"></textarea>
+                            </div><br>
+                            <div class="form-actions" id="upload-comment">
+                                <input class="btn btn-comment" type="submit" value="Comment"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            <% }; %>
+
+            
         </div>
     </main>
     

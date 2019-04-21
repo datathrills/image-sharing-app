@@ -105,6 +105,9 @@ app.get('/', (req, res) => {
 
 app.get('/threads/:id', (req, res) => {
 
+    //REMOVE THIS
+    req.session.data = "testingBro";
+
     // Session data
     const sessionData = req.session.data;  
     const sessionCheck = (sessionData) => {
@@ -133,7 +136,6 @@ app.get('/threads/:id', (req, res) => {
             res.status(500).send("Database Error!");
         } else {
             if(results.length > 0) {
-                console.log("CRASH FLAG")
                 res.render('thread', {thread: results[0], replies: results[1], session: session, likedThread: results[2], likesNum: results[3]});
             } else {
                 res.status(500).send("Database is empty!");
@@ -397,6 +399,44 @@ app.post('/likes/:id', (req, res) => {
     }
 });
 
+app.post('/threads/:id', (req, res) => {
+
+  // {"message":"","id":"1"}
+
+    const sessionData = req.session.data;
+
+    // Restrict access to login users
+    if(!sessionData){
+        res.redirect('/');
+    } else {
+
+        //const message = JSON.parse(req.params.post);
+        const message = req.body.message;
+        console.log(message);
+        const threadID = Number(req.params.id);
+
+        const usernameSql = "(SELECT users.id FROM users WHERE users.username='" + sessionData + "')";
+        
+        const insertCommentSql = "INSERT INTO replies (id, thread_id, reply_user_id, reply_text, reply_timestamp) VALUES (NULL, " + threadID +", " + usernameSql + ",'" + message + "', NULL )";
+
+        const repliesSql = "SELECT * FROM replies WHERE reply_user_id="+ usernameSql +" ORDER BY reply_timestamp DESC LIMIT 1";
+
+        const sql = insertCommentSql + "; " + repliesSql;
+
+        console.log(sql);
+
+        connection.query(sql, (err, results) => {
+            if (err) {
+                res.status(500).send("Database Error!");
+            } else {
+                console.log(results);
+                results[1][0].username = sessionData;
+                res.json(results[1]);
+            }
+        });
+    }
+
+});
 
 // Start the server
 const port = process.env.PORT || 8081;
