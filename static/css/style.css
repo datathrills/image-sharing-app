@@ -122,16 +122,51 @@ label {
     justify-content: flex-start;
     padding-bottom: 10px;
 }
-.upvote-btn, .upvote-non-btn {
+
+.upvote-default-btn, .upvote-lurker-btn {
+    width: 1em;
+}
+.upvote-default-btn {
+    cursor: pointer; 
+}
+.upvote-default-btn.upvote-non-clickable-btn{
+    cursor: auto; 
+}
+
+.upvote-default-btn.upvote-non-clickable-btn svg {
+    fill: #DD2E44;
+}
+
+.upvote-default-btn svg{
+    fill: #77484d;
+}
+.upvote-default-btn svg:hover{
+    fill: #DD2E44;
+}
+.upvote-lurker-btn svg {
+    fill: #394152;
+}
+
+/* .upvote-btn, .upvote-non-btn, .upvote-inactive-btn  {
     width: 1em;
 }
 
 .upvote-btn svg {
     fill: #DD2E44;
 }
-.upvote-non-btn svg {
-    fill: #604649;
+.upvote-inactive-btn svg{
+    fill: #77484d;   
 }
+.upvote-inactive-btn svg:hover{
+    fill: #DD2E44;
+    cursor: pointer; 
+}
+
+.upvote-non-btn svg {
+    fill: #394152;
+} */
+
+
 .upvote-number {
     padding-left: 5px;
     padding-top: 2px;

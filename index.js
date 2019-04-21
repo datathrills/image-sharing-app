@@ -14,6 +14,7 @@ app.use(express.static('static'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(fileUpload());
 
 // Session cookie
@@ -62,6 +63,9 @@ connection.connect( err => {
 // Home page
 app.get('/', (req, res) => {
 
+    //REMOVE THIS
+    req.session.data = "bestUser";
+
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     //console.log(userIP);
 
@@ -80,15 +84,15 @@ app.get('/', (req, res) => {
 
     const threadsWithHeart = "SELECT thread_id AS thread FROM likes WHERE likes.user_id= (SELECT users.id FROM users WHERE users.username='" + sessionData +"')";
 
-    const sql = "CREATE TABLE Temp(thread_id int(11), thread_likes int(11)); INSERT INTO Temp SELECT thread_id, COUNT(likes.id) AS thread_likes FROM likes WHERE likes.thread_id = ANY(SELECT threads.id FROM threads); SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id;"+ threadsWithHeart +";DROP TABLE Temp";
+    const sql = "CREATE TABLE Temp(thread_id int(11), thread_likes int(11));INSERT INTO Temp SELECT threads.id AS thread_id, COUNT(likes.id) as num_likes FROM threads LEFT JOIN likes ON likes.thread_id = threads.id GROUP BY threads.id; SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id;" + threadsWithHeart + ";DROP TABLE Temp"
 
     connection.query(sql, (err, results) => {
         if (err) {
-            res.status(500).send("Database Error!");
+            res.status(500).send("Database Error! 1");
         } else {
             if (results.length > 0) {
                 // Render index
-                //console.log(results)
+                //console.log(results[3][1]["thread"]);
                 res.render('index', {data: results[2], likedThread: results[3], session: session, uploadMessage: ""});
             } else {
                 res.status(500).send("Database is empty!");
@@ -346,30 +350,63 @@ app.post('/upload', (req, res) => {
     });
 });
 
+
+// Liking a thread from homepage
+
 app.post('/likes/:id', (req, res) => {
-    
+
     const sessionData = req.session.data;
 
     // Restrict access to login users
-    if(sessionData){
+    if(!sessionData){
         res.redirect('/');
     } else {
-        //Check if user has allready liked this post
-
+        
+        // Just to be sure, check if user has allready liked this post
+        
         const threadID = req.params.id;
 
+        const isLegitSql = "SELECT IF (COUNT(*) > 0, 'true', 'false') AS thread FROM likes WHERE likes.user_id= (SELECT users.id FROM users WHERE users.username='" + sessionData +"') AND thread_id ="+ threadID;
+        const UserIDSql = "SELECT id FROM users WHERE username='" + String(sessionData) + "'";
+        const sql = isLegitSql + ";" + UserIDSql;
 
+        connection.query(sql, (err, results) => {
+            if (err) {
+                res.status(500).send("Database Error!");
+            } else {
+         
+                if (results[0][0]["thread"]  == "true") {
+                    console.log("ILLEGAL LIKES ERROR!!");
+                    connectAndRenderHomepage(req, res, sessionData, "ILLEGAL LIKES ERROR! NO HACKING LIKES ALLOWED!!_@_@");
+                }
+                else if (results[0][0]["thread"] == "false") {
+                    
+                    // Since this post wasn't like by the user we will not write this like into the database
+                    const sqlLike = "INSERT INTO likes (id, thread_id, user_id) VALUES (NULL, '" + threadID +"', '" + results[1][0]["id"] + "')";
 
+                    connection.query(sqlLike, (err) => {
+                        if (err) {
+                            res.status(500).send("Database Error!");
+                        } else {
+                            console.log("Sucessfuly updated like!");
+                            res.json(threadID);
+                        };
+                    });
 
+                } else {
+                    console.log("Database got messed up somehow... Hope it never happens.");
+                    res.redirect('/');
+                };
+            };
+        });
     }
+});
 
-    
-    
 
+app.post('/threads/:id/likes/:name', (req, res) => {
 
 
 });
-
 
 // Start the server
 const port = process.env.PORT || 8081;
@@ -378,15 +415,18 @@ app.listen(port, () => console.log(`Server running on ${port}`));
 
 // Renders a homepage with upload error messages
 function connectAndRenderHomepage(req, res, session, error_message){
+    
     // SQL
-    const sql ="CREATE TABLE Temp(thread_id int(11), thread_likes int(11)); INSERT INTO Temp SELECT thread_id, COUNT(likes.id) AS thread_likes FROM likes WHERE likes.thread_id = ANY(SELECT threads.id FROM threads); SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id; DROP TABLE Temp";
+    const threadsWithHeart = "SELECT thread_id AS thread FROM likes WHERE likes.user_id= (SELECT users.id FROM users WHERE users.username='" + sessionData +"')";
+
+    const sql = "CREATE TABLE Temp(thread_id int(11), thread_likes int(11));INSERT INTO Temp SELECT threads.id AS thread_id, COUNT(likes.id) as num_likes FROM threads LEFT JOIN likes ON likes.thread_id = threads.id GROUP BY threads.id; SELECT threads.id, threads.thread_image_id, threads.thread_name, threads.thread_text, DATE_FORMAT(threads.thread_timestamp,'%d/%b/%Y(%a) %H:%i:%s') AS thread_timestamp, Temp.thread_likes, users.username FROM threads LEFT JOIN users ON threads.thread_opid=users.id LEFT JOIN Temp ON threads.id=Temp.thread_id;" + threadsWithHeart + ";DROP TABLE Temp"
 
     connection.query(sql, (err, results) => {
         if (err) {
             res.status(500).send("Database Error!");
         } else {
             if (results.length > 0) {
-                res.render('index', {data: results[2], session: session, uploadMessage: error_message});
+                res.render('index', {data: results[2], likedThread: results[3], session: session, uploadMessage: error_message});
             } else {
                 res.status(500).send("Database is empty!");
             };
