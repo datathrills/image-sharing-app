@@ -1,5 +1,6 @@
 $(function() {
 
+    // Updating likes
     $(".upvote-default-btn:not(.upvote-non-clickable-btn)").on('click', function(event){
         console.log("button clicked!");
         event.stopPropagation();
@@ -15,6 +16,7 @@ $(function() {
         });
     });
 
+    // Posting comments
     $("#upload-comment > .btn-comment").on('click', function(event){
         console.log("button clicked!");
         event.preventDefault();
@@ -26,7 +28,6 @@ $(function() {
         $.ajax({
             url: window.location.pathname,
             type: "POST",
-            //contentType: "application/json",
             data: {
                 message: text
             }

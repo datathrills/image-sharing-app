@@ -147,26 +147,6 @@ label {
     fill: #394152;
 }
 
-/* .upvote-btn, .upvote-non-btn, .upvote-inactive-btn  {
-    width: 1em;
-}
-
-.upvote-btn svg {
-    fill: #DD2E44;
-}
-.upvote-inactive-btn svg{
-    fill: #77484d;   
-}
-.upvote-inactive-btn svg:hover{
-    fill: #DD2E44;
-    cursor: pointer; 
-}
-
-.upvote-non-btn svg {
-    fill: #394152;
-} */
-
-
 .upvote-number {
     padding-left: 5px;
     padding-top: 2px;
@@ -174,6 +154,7 @@ label {
     font-size: 0.7em;
     color: #394152;
 }
+
 
 /* Comments */
 
@@ -214,6 +195,7 @@ footer{
     margin-top: 30px;
     padding: 10px;
 }
+
 
 /* Registration */
 
@@ -306,6 +288,7 @@ footer{
     background: #e29b93;
     color: #2f3235;
 }
+
 
 /* New thread */
 
